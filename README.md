@@ -29,6 +29,16 @@ flowchart LR
 - **Speak** — turn understood context into an `agentlex` symbolic message (`express`),
   and fold a received message back into memory (`ingest`). That's the tandem.
 
+<!-- cognis:domains:start -->
+## Domains
+
+**Primary domain:** AI & ML  ·  **JTF MERIDIAN division:** ATHENA-PRIME · SAGE
+
+**Topics:** `cognis` `ai` `llm` `machine-learning` `agent-security`
+
+Part of the **Cognis Neural Suite** — 300+ source-available tools organized across 12 domains under the JTF MERIDIAN command structure. See the [suite on GitHub](https://github.com/cognis-digital) and [jtf-meridian](https://github.com/cognis-digital/jtf-meridian) for how the pieces fit together.
+<!-- cognis:domains:end -->
+
 ## Install & try
 
 ```bash
