@@ -6,14 +6,19 @@ agents in `agentlex`. It models *facets* of cognition (memory, attention, affect
 intent); it does not literally replicate the brain.
 """
 
-from humind.extract import ContextFrame, affect, classify_intent, entities, extract, salient
-from humind.memory import CognitiveMemory, EpisodicMemory, SemanticMemory, WorkingMemory
+from humind.extract import (ContextFrame, affect, causal_links, classify_intent,
+                            entities, extract, salient)
+from humind.learning import LexiconLearner, ValueLearner
+from humind.memory import (AssociativeMemory, CognitiveMemory, EpisodicMemory,
+                           SemanticMemory, WorkingMemory)
 from humind.mind import Mind
+from humind.systems import CausalGraph
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "extract", "ContextFrame", "classify_intent", "entities", "affect", "salient",
-    "WorkingMemory", "EpisodicMemory", "SemanticMemory", "CognitiveMemory", "Mind",
-    "__version__",
+    "causal_links", "WorkingMemory", "EpisodicMemory", "SemanticMemory",
+    "AssociativeMemory", "CognitiveMemory", "ValueLearner", "LexiconLearner",
+    "CausalGraph", "Mind", "__version__",
 ]

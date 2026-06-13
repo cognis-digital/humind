@@ -11,10 +11,13 @@ humind is the *understanding*, agentlex is the *language* two minds speak.
 
 ```mermaid
 flowchart LR
-    T[natural language] --> P[perceive: extract<br/>entities · intent · affect · salience]
+    T[natural language] --> P[perceive: extract<br/>entities · intent · affect · salience · causality]
+    P --> SUR[predictive coding<br/>surprise = prediction error]
     P --> WM[working memory<br/>activation + decay → attention]
-    P --> EM[episodic memory<br/>what happened, when]
-    P --> SM[semantic memory<br/>durable facts]
+    P --> AM[associative memory<br/>Hebbian + spreading activation]
+    P --> EM[episodic memory] --> SM[semantic memory<br/>CLS consolidation]
+    P --> CG[causal-loop model<br/>R/B feedback loops · leverage]
+    WM & AM & VL[TD λ value<br/>reinforce outcomes] --> PR[priorities<br/>value-weighted attention]
     WM & SM --> X[express → agentlex message]
     X -. another mind .-> I[ingest agentlex → memory]
 ```
@@ -22,12 +25,49 @@ flowchart LR
 ## What it does
 
 - **Perceive** — pull entities, the speech-act **intent** (inform/request/query/
-  propose/agree/refuse), **affect** (valence + arousal/urgency), and **salient** terms
-  out of an utterance, transparently.
-- **Remember** — three stores: **working** (capacity-bounded, decaying → the current
-  *attention*), **episodic** (time-ordered events), **semantic** (durable facts).
+  propose/agree/refuse), **affect** (negation-aware valence + arousal/urgency),
+  **salient** terms, and **causal links** out of an utterance, transparently.
+- **Remember** — four stores: **working** (capacity-bounded, decaying → *attention*),
+  **episodic** (events), **semantic** (durable facts, grown by **CLS consolidation**),
+  and **associative** (Hebbian co-occurrence → **spreading activation** / cued recall).
+- **Learn** — `reinforce(reward)` does **TD(λ)** credit assignment with eligibility
+  traces, so the mind discovers *which context mattered*; unseen words acquire affect
+  online (**Rescorla-Wagner**). It **predicts** the next context and tracks **surprise**.
+- **Reason about structure** — builds a **causal-loop diagram**, finds **reinforcing /
+  balancing feedback loops**, and ranks **leverage points** (systems thinking).
 - **Speak** — turn understood context into an `agentlex` symbolic message (`express`),
   and fold a received message back into memory (`ingest`). That's the tandem.
+
+## How it thinks — grounded mechanisms, not buzzwords
+
+Every layer is a named, explainable mechanism from the literature — pure stdlib, no tensors:
+
+| Capability | Mechanism | Lineage |
+|---|---|---|
+| attention / forgetting | activation + decay, capacity bound | ACT-R · Miller 7±2 · Global Workspace |
+| association / recall | Hebbian co-occurrence + spreading activation | Hebb · Collins & Loftus |
+| learning from outcomes | TD(λ) with eligibility traces | Sutton & Barto |
+| affect acquisition | Rescorla-Wagner delta rule | classical conditioning |
+| prediction / attention gain | predictive coding (surprise = error) | Friston / free-energy |
+| memory consolidation | Complementary Learning Systems | McClelland & O'Reilly |
+| structural reasoning | causal-loop diagrams, R/B loops, leverage | Forrester · Sterman · Meadows |
+
+```bash
+humind causal "AIS gap leads to escalation" "sanctions pressure drives dark activity" \
+              "dark activity increases sanctions pressure"
+#   ais gap --(+)--> escalation ; reinforcing loop R: sanctions pressure <-> dark activity
+humind learn      # an unseen word ("shadowfleet") acquires negative valence from outcomes
+humind bench      # ~3,700 frames/sec, pure stdlib
+```
+```python
+from humind import Mind
+m = Mind()
+for _ in range(6):
+    m.perceive("detected a shadowfleet maneuver near the strait")
+    m.reinforce(-1.0)                 # this context preceded a bad outcome
+m.perceive("another shadowfleet contact").valence   # < 0 — learned it's threatening
+m.feedback_loops(); m.leverage_points(); m.priorities()
+```
 
 <!-- cognis:domains:start -->
 ## Domains

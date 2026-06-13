@@ -29,11 +29,22 @@ _VALENCE = {
     "confirmed": 0.4, "high": -0.4, "low": 0.3, "calm": 0.5, "alarm": -0.7,
 }
 _AROUSAL = {"urgent", "critical", "danger", "threat", "alarm", "now", "immediately", "emergency"}
+_NEGATORS = {"not", "no", "never", "without", "cannot", "can't", "isn't", "aren't",
+             "wasn't", "won't", "don't", "doesn't", "lacks", "lack"}
 _STOP = set("a an the of to in on at is are was were be been and or but for with this that "
             "it its as by from we i you he she they them our your".split())
 # all-caps status/severity markers that read as entities but aren't named things
 _NONENTITY = set("critical urgent alert warning notice note high low medium fyi update status "
                  "emergency caution danger info report flash priority routine".split())
+
+# causal connectives -> (polarity, reversed?)  reversed means 'effect <conn> cause'
+_CAUSAL = [
+    (r"causes|leads to|results in|drives|triggers|increases|boosts|enables|raises|escalates", 1, False),
+    (r"because of|due to|driven by|caused by|result of", 1, True),
+    (r"reduces|decreases|prevents|mitigates|limits|suppresses|lowers|slows|dampens", -1, False),
+]
+_CAUSAL = [(re.compile(r"(.{0,60}?)\b(?:" + pat + r")\b(.{0,60})", re.I), pol, rev)
+           for pat, pol, rev in _CAUSAL]
 
 
 @dataclass
@@ -44,6 +55,8 @@ class ContextFrame:
     salient: list[str] = field(default_factory=list)
     valence: float = 0.0                     # negative = threatening/bad, positive = good
     arousal: float = 0.0                     # 0..1 urgency
+    causes: list[tuple[str, str, int]] = field(default_factory=list)  # (cause, effect, polarity)
+    surprise: float = 0.0                    # prediction error vs current expectation (set by Mind)
     notes: str = ""                          # optional LLM-enrichment annotation (see addins)
 
     def to_dict(self) -> dict:
@@ -80,14 +93,49 @@ def entities(text: str) -> list[str]:
     return out
 
 
-def affect(text: str) -> tuple[float, float]:
+def affect(text: str, extra: dict | None = None) -> tuple[float, float]:
+    """Valence/arousal. Negation within the prior two tokens flips a valence word.
+    `extra` supplies learned word-valences (see humind.learning.LexiconLearner)."""
     words = re.findall(r"[a-z']+", text.lower())
     if not words:
         return 0.0, 0.0
-    vals = [_VALENCE[w] for w in words if w in _VALENCE]
+    lex = _VALENCE if not extra else {**_VALENCE, **extra}
+    vals = []
+    for i, w in enumerate(words):
+        if w in lex:
+            v = lex[w]
+            if any(t in _NEGATORS for t in words[max(0, i - 2):i]):
+                v = -v                            # "not safe" -> threatening
+            vals.append(v)
     valence = round(sum(vals) / len(vals), 3) if vals else 0.0
     arousal = round(min(1.0, sum(1 for w in words if w in _AROUSAL) / 3.0), 3)
     return valence, arousal
+
+
+def _concept(phrase: str, pos: str) -> str:
+    """The concept nearest the connective: trailing tokens of a left phrase, leading
+    tokens of a right phrase (drops stopwords; keeps up to 3 tokens)."""
+    words = [w for w in re.findall(r"[A-Za-z0-9-]+", phrase)
+             if w.lower() not in _STOP and len(w) > 1]
+    if not words:
+        return ""
+    words = words[-3:] if pos == "left" else words[:3]
+    return " ".join(words).lower()
+
+
+def causal_links(text: str) -> list[tuple[str, str, int]]:
+    """Extract (cause, effect, polarity) triples from causal language."""
+    out, seen = [], set()
+    for rx, pol, rev in _CAUSAL:
+        for left, right in rx.findall(text):
+            if rev:                                # 'effect <conn> cause'  -> normalize
+                cause, effect = _concept(right, "right"), _concept(left, "left")
+            else:                                  # 'cause <conn> effect'
+                cause, effect = _concept(left, "left"), _concept(right, "right")
+            if cause and effect and cause != effect and (cause, effect) not in seen:
+                seen.add((cause, effect))
+                out.append((cause, effect, pol))
+    return out
 
 
 def salient(text: str, k: int = 5) -> list[str]:
@@ -98,7 +146,10 @@ def salient(text: str, k: int = 5) -> list[str]:
     return [w for w, _ in sorted(freq.items(), key=lambda kv: kv[1], reverse=True)[:k]]
 
 
-def extract(text: str) -> ContextFrame:
-    v, a = affect(text)
+def extract(text: str, lexicon: dict | None = None) -> ContextFrame:
+    """Parse an utterance into a ContextFrame. `lexicon` optionally supplies learned
+    word-valences (from humind.learning) so affect reflects experience."""
+    v, a = affect(text, lexicon)
     return ContextFrame(text=text.strip(), intent=classify_intent(text),
-                        entities=entities(text), salient=salient(text), valence=v, arousal=a)
+                        entities=entities(text), salient=salient(text), valence=v, arousal=a,
+                        causes=causal_links(text))

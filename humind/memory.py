@@ -81,8 +81,61 @@ class SemanticMemory:
                 and (obj is None or f[2] == obj)]
 
 
+class AssociativeMemory:
+    """Hebbian co-occurrence network with spreading activation.
+
+    'Cells that fire together wire together' — items attended in the same moment have
+    their pairwise association strengthened (capped). `spread()` propagates activation
+    one hop from a set of seeds, so cueing one concept brings associated ones to mind
+    (spreading activation, after Collins & Loftus / ACT-R)."""
+
+    def __init__(self, cap: float = 5.0) -> None:
+        self.w: dict[str, dict[str, float]] = {}
+        self.cap = cap
+
+    def coactivate(self, items, strength: float = 1.0) -> None:
+        items = list(dict.fromkeys(items))               # de-dupe, keep order
+        for i, a in enumerate(items):
+            row = self.w.setdefault(a, {})
+            for b in items[i + 1:]:
+                row[b] = min(self.cap, row.get(b, 0.0) + strength)
+                back = self.w.setdefault(b, {})
+                back[a] = min(self.cap, back.get(a, 0.0) + strength)
+
+    def spread(self, seeds, n: int = 5) -> list[tuple[str, float]]:
+        act: dict[str, float] = {}
+        for s in seeds:
+            for nbr, weight in self.w.get(s, {}).items():
+                if nbr not in seeds:
+                    act[nbr] = act.get(nbr, 0.0) + weight
+        return sorted(act.items(), key=lambda kv: kv[1], reverse=True)[:n]
+
+    def associates(self, item: str, n: int = 5) -> list[str]:
+        return [k for k, _ in sorted(self.w.get(item, {}).items(),
+                                     key=lambda kv: kv[1], reverse=True)[:n]]
+
+
 @dataclass
 class CognitiveMemory:
     working: WorkingMemory = field(default_factory=WorkingMemory)
     episodic: EpisodicMemory = field(default_factory=EpisodicMemory)
     semantic: SemanticMemory = field(default_factory=SemanticMemory)
+    assoc: AssociativeMemory = field(default_factory=AssociativeMemory)
+
+    def consolidate(self, min_count: int = 2) -> list[tuple[str, str, str]]:
+        """Complementary Learning Systems: distil entities that recur across episodes
+        into durable semantic facts (fast hippocampal log -> slow neocortical store).
+        Returns the facts newly consolidated."""
+        counts: dict[str, int] = {}
+        for _, frame in self.episodic.events:
+            for e in getattr(frame, "entities", []):
+                key = e.lower()
+                counts[key] = counts.get(key, 0) + 1
+        new = []
+        for ent, c in counts.items():
+            if c >= min_count:
+                fact = (ent, "consolidated", str(c))
+                if fact not in self.semantic.facts:
+                    self.semantic.assert_fact(*fact)
+                    new.append(fact)
+        return new

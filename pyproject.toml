@@ -4,13 +4,15 @@ build-backend = "hatchling.build"
 
 [project]
 name = "humind"
-version = "0.2.0"
-description = "Cognitive-architecture-inspired NL context engine — entities/intent/affect + working/episodic/semantic memory, speaking agentlex"
+version = "0.3.0"
+description = "Cognitive-architecture-inspired NL context engine — entities/intent/affect/causality + working/episodic/semantic/associative memory, TD(lambda) reinforcement, predictive coding & systems-thinking, speaking agentlex"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "LicenseRef-COCL-1.0" }
 authors = [{ name = "Cognis Digital LLC" }]
-keywords = ["nlp", "cognitive-architecture", "context-extraction", "memory", "agents", "symbolic-ai", "act-r"]
+keywords = ["nlp", "cognitive-architecture", "context-extraction", "memory", "agents",
+            "symbolic-ai", "act-r", "reinforcement-learning", "td-lambda", "hebbian",
+            "predictive-coding", "systems-thinking", "causal-loop", "neurobiology"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
