@@ -70,3 +70,6 @@ ambiguous free text — so a query pattern from one mind matches a fact from ano
 
 ## License
 Cognis Open Collaboration License (COCL) 1.0 — see [LICENSE](LICENSE).
+
+---
+📡 **[Interop map](INTEROP.md)** — how this repo composes with the rest of the Cognis suite (private-AI backbone, agent language + cognition, domain intelligence).
