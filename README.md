@@ -68,6 +68,21 @@ humind perceive "vessel NEPTUNE-STAR went dark" --ai      # adds a `notes` readi
 ```
 No backend reachable? Enrichment is silently skipped; the stdlib frame is unchanged.
 
+## Executable interop demo
+
+The interop map, *running* — [`examples/cluster_demo.py`](examples/cluster_demo.py):
+
+```
+[maritimeint] watchlist: ['NEPTUNE STAR', 'QUIET DAWN', 'GHOST RUNNER']
+[humind->agentlex] inform from:analyst to:broadcast :: observed(neptune-star, high)
+[agentlex] escalations derived: ['escalate(neptune-star)']   # rule: high-risk AND sanctioned
+```
+
+A maritimeint watchlist → humind understands each finding → expresses it in agentlex →
+an agentlex knowledge-base rule derives which vessels to **escalate** → (optionally) an
+edgemesh-routed model writes the brief. Uses real maritimeint data if installed, a sample
+otherwise; the edgemesh step is skipped gracefully with no backend.
+
 ## The tandem
 `humind` ⇄ `agentlex`: understanding produces language; language updates understanding.
 Two (or many) humind agents exchange precise, *unifiable* symbolic messages instead of

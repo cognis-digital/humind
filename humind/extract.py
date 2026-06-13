@@ -32,8 +32,8 @@ _AROUSAL = {"urgent", "critical", "danger", "threat", "alarm", "now", "immediate
 _STOP = set("a an the of to in on at is are was were be been and or but for with this that "
             "it its as by from we i you he she they them our your".split())
 # all-caps status/severity markers that read as entities but aren't named things
-_NONENTITY = set("critical urgent alert warning notice high low medium fyi update status "
-                 "emergency caution danger info report".split())
+_NONENTITY = set("critical urgent alert warning notice note high low medium fyi update status "
+                 "emergency caution danger info report flash priority routine".split())
 
 
 @dataclass
