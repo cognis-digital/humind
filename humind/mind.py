@@ -36,8 +36,18 @@ class Mind:
         self._clock = 0
 
     # --- perception ----------------------------------------------------------
-    def perceive(self, text: str) -> ContextFrame:
+    def perceive(self, text: str, *, enrich: bool = False, endpoint: str | None = None,
+                 model: str | None = None) -> ContextFrame:
         frame = extract(text)
+        if enrich or endpoint:                     # optional LLM augmentation (graceful)
+            try:
+                from humind import addins
+                where = (endpoint, [model or "default"]) if endpoint else addins.discover()
+                if where:
+                    base, models = where
+                    frame.notes = addins.interpret(text, base, model or (models or ["default"])[0])
+            except Exception:
+                pass                               # core is unaffected if enrichment fails
         self._clock += 1
         self.memory.episodic.record(self._clock, frame)
         weight = 1.0 + frame.arousal               # urgent input grabs more attention

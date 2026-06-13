@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "humind"
-version = "0.1.0"
+version = "0.2.0"
 description = "Cognitive-architecture-inspired NL context engine — entities/intent/affect + working/episodic/semantic memory, speaking agentlex"
 readme = "README.md"
 requires-python = ">=3.10"

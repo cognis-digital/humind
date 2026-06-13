@@ -44,6 +44,7 @@ class ContextFrame:
     salient: list[str] = field(default_factory=list)
     valence: float = 0.0                     # negative = threatening/bad, positive = good
     arousal: float = 0.0                     # 0..1 urgency
+    notes: str = ""                          # optional LLM-enrichment annotation (see addins)
 
     def to_dict(self) -> dict:
         return asdict(self)

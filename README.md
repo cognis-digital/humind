@@ -47,6 +47,17 @@ command.ingest(msg)            # command now knows it, and it's in focus
 print(command.attention())     # ['neptune-star']
 ```
 
+## Optional LLM enrichment (stays optional)
+
+The core extractor is transparent and offline. When a model backend is reachable, you
+can *augment* it with a concise analyst interpretation — without giving up explainability:
+
+```bash
+export HUMIND_ENDPOINT=http://<edgemesh-or-fleet>:8780   # or --endpoint
+humind perceive "vessel NEPTUNE-STAR went dark" --ai      # adds a `notes` reading
+```
+No backend reachable? Enrichment is silently skipped; the stdlib frame is unchanged.
+
 ## The tandem
 `humind` ⇄ `agentlex`: understanding produces language; language updates understanding.
 Two (or many) humind agents exchange precise, *unifiable* symbolic messages instead of

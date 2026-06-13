@@ -10,7 +10,7 @@ from humind.extract import ContextFrame, affect, classify_intent, entities, extr
 from humind.memory import CognitiveMemory, EpisodicMemory, SemanticMemory, WorkingMemory
 from humind.mind import Mind
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "extract", "ContextFrame", "classify_intent", "entities", "affect", "salient",

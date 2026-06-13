@@ -33,12 +33,19 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--version", action="version", version=f"humind {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
     sp = sub.add_parser("perceive"); sp.add_argument("text")
+    sp.add_argument("--ai", action="store_true", help="enrich with an LLM if a backend is reachable")
+    sp.add_argument("--endpoint", default=None, help="OpenAI-compatible base URL (edgemesh/fleet)")
+    sp.add_argument("--model", default=None)
     st = sub.add_parser("think"); st.add_argument("text", nargs="+")
     sub.add_parser("demo")
     args = p.parse_args(argv)
 
     if args.cmd == "perceive":
-        print(json.dumps(extract(args.text).to_dict(), indent=2))
+        if args.ai or args.endpoint:
+            frame = Mind("you").perceive(args.text, enrich=True, endpoint=args.endpoint, model=args.model)
+            print(json.dumps(frame.to_dict(), indent=2))
+        else:
+            print(json.dumps(extract(args.text).to_dict(), indent=2))
         return 0
     if args.cmd == "think":
         mind = Mind("you")
