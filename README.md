@@ -133,6 +133,11 @@ ambiguous free text — so a query pattern from one mind matches a fact from ano
 - [`engram`](https://github.com/cognis-digital/engram) · [`hermes`](https://github.com/cognis-digital/hermes) · [`memorybank`](https://github.com/cognis-digital/memorybank) — durable backends for semantic memory.
 - [`edgemesh`](https://github.com/cognis-digital/edgemesh) — run an optional LLM enrichment step privately on your own fleet.
 
+## Integrations
+
+Forward `humind`'s findings to STIX/MISP/Sigma/Splunk/Elastic/Slack/webhooks via
+[`cognis-connect`](https://github.com/cognis-digital/cognis-connect). See **[INTEGRATIONS.md](INTEGRATIONS.md)**.
+
 ## License
 Cognis Open Collaboration License (COCL) 1.0 — see [LICENSE](LICENSE).
 
