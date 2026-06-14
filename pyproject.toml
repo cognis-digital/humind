@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "humind"
-version = "0.3.0"
+version = "0.3.1"
 description = "Cognitive-architecture-inspired NL context engine — entities/intent/affect/causality + working/episodic/semantic/associative memory, TD(lambda) reinforcement, predictive coding & systems-thinking, speaking agentlex"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -26,9 +26,11 @@ dependencies = ["agentlex @ git+https://github.com/cognis-digital/agentlex.git"]
 Homepage = "https://github.com/cognis-digital/humind"
 
 [project.scripts]
+"humind-emit" = "humind.connect:emit_main"
 humind = "humind.cli:main"
 
 [project.optional-dependencies]
+connect = ["cognis-connect @ git+https://github.com/cognis-digital/cognis-connect.git"]
 dev = ["pytest>=7"]
 
 [tool.hatch.build.targets.wheel]
