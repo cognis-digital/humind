@@ -22,6 +22,64 @@ flowchart LR
     X -. another mind .-> I[ingest agentlex → memory]
 ```
 
+
+<!-- cognis:example:start -->
+## 🔎 Example output
+
+Real, reproducible output from the tool — runs offline:
+
+```console
+$ humind-emit --help
+usage: humind-emit [-h]
+                   --to {stix,taxii,misp,sigma,splunk,elastic,slack,discord,webhook,brief,findings}
+                   [--url URL] [--token TOKEN] [--dry-run]
+                   [input]
+
+forward humind JSON findings to a platform via cognis-connect
+
+positional arguments:
+  input                 findings JSON file (default: stdin)
+
+options:
+  -h, --help            show this help message and exit
+  --to {stix,taxii,misp,sigma,splunk,elastic,slack,discord,webhook,brief,findings}
+  --url URL
+  --token TOKEN
+  --dry-run
+```
+
+> Blocks above are real `humind` output — reproduce them from a clone.
+
+**Sample result format** _(illustrative values — run on your own data for real findings):_
+
+```
+{
+"timestamp": "2023-02-20T14:30:00Z",
+"findings": [
+  {
+    "id": "1234567890",
+    "title": "Suspicious Network Traffic",
+    "description": "Potential malicious activity detected on port 443.",
+    "indicator": {
+      "type": "ip",
+      "value": "192.168.1.100"
+    }
+  },
+  {
+    "id": "2345678901",
+    "title": "Unusual Login Attempt",
+    "description": "Failed login attempt from an unknown location.",
+    "indicator": {
+      "type": "user-agent",
+      "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36"
+    }
+  }
+]
+}
+```
+
+<!-- cognis:example:end -->
+
 ## What it does
 
 - **Perceive** — pull entities, the speech-act **intent** (inform/request/query/
