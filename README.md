@@ -127,6 +127,41 @@ m.perceive("another shadowfleet contact").valence   # < 0 — learned it's threa
 m.feedback_loops(); m.leverage_points(); m.priorities()
 ```
 
+## Demos
+
+Five runnable, audience-varied scenarios live in [`demos/`](demos/), one per layer
+of the toolkit. Each builds its own fresh `Mind` from a small **bundled inline
+transcript** — no network, no external data — so they run anywhere and exit 0 (they
+double as smoke tests, covered by [`tests/test_demos.py`](tests/test_demos.py)).
+
+```bash
+PYTHONUTF8=1 python demos/run_all.py                       # all five, end to end
+PYTHONUTF8=1 python demos/02_reinforcement_learning.py     # or just one
+```
+
+| # | Scenario | Audience | Layer it shows |
+|---|----------|----------|----------------|
+| 1 | [Perception pipeline](demos/01_perception_pipeline.py) | ML engineers | one transparent `ContextFrame` — intent, negation-aware affect, entities, salience, causes |
+| 2 | [Reinforcement learning](demos/02_reinforcement_learning.py) | RL researchers | TD(λ) eligibility traces + Rescorla-Wagner: an unseen word acquires affect from reward |
+| 3 | [Memory & association](demos/03_memory_and_association.py) | students & educators | four stores + Hebbian spreading activation + predictive-coding surprise + CLS consolidation |
+| 4 | [Systems thinking](demos/04_systems_thinking.py) | systems builders | causal-loop diagram, reinforcing/balancing feedback loops, leverage points |
+| 5 | [Two minds, one language](demos/05_two_minds_tandem.py) | systems builders | the agentlex tandem — `express` → wire → `ingest`, then KB rule inference |
+
+```mermaid
+flowchart LR
+    T[natural language] --> P[perceive<br/>intent · affect · entities · salience · causes]
+    P --> WM[(working memory<br/>activation + decay → focus)]
+    P --> AM[(associative<br/>Hebbian)]
+    P --> RL[TD λ value<br/>reinforce outcomes]
+    P --> CG[causal-loop model<br/>R/B loops · leverage]
+    WM & RL & CG --> PR[priorities]
+    P --> X[express → agentlex message]
+    X -. wire .-> I[another mind: ingest → memory]
+```
+
+See [`docs/DEMOS.md`](docs/DEMOS.md) for the write-ups and
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the pieces fit together.
+
 <!-- cognis:domains:start -->
 ## Domains
 
