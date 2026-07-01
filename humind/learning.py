@@ -20,7 +20,19 @@ no training loop — just the update equations.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
+
+
+def _finite_reward(reward: float) -> float:
+    """Validate a reward is a finite number — NaN/inf would silently poison values."""
+    try:
+        r = float(reward)
+    except (TypeError, ValueError):
+        raise TypeError(f"reward must be a number, got {type(reward).__name__}")
+    if not math.isfinite(r):
+        raise ValueError(f"reward must be finite, got {reward}")
+    return r
 
 
 @dataclass
@@ -31,6 +43,14 @@ class ValueLearner:
     lam: float = 0.8            # trace decay (eligibility)
     value: dict[str, float] = field(default_factory=dict)
     trace: dict[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not 0.0 < self.alpha <= 1.0:
+            raise ValueError(f"alpha (learning rate) must be in (0, 1], got {self.alpha}")
+        if not 0.0 <= self.gamma <= 1.0:
+            raise ValueError(f"gamma (discount) must be in [0, 1], got {self.gamma}")
+        if not 0.0 <= self.lam <= 1.0:
+            raise ValueError(f"lam (trace decay) must be in [0, 1], got {self.lam}")
 
     def attend(self, items) -> None:
         """Mark items as attended this step; decay then bump their eligibility."""
@@ -44,6 +64,7 @@ class ValueLearner:
 
     def reinforce(self, reward: float) -> dict[str, float]:
         """Apply a reward; credit flows to every item by its current trace."""
+        reward = _finite_reward(reward)
         updated = {}
         for it, e in self.trace.items():
             self.value[it] = self.value.get(it, 0.0) + self.alpha * reward * e
@@ -60,8 +81,12 @@ class LexiconLearner:
     eta: float = 0.15
     learned: dict[str, float] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        if not 0.0 < self.eta <= 1.0:
+            raise ValueError(f"eta (learning rate) must be in (0, 1], got {self.eta}")
+
     def update(self, words, reward: float) -> None:
-        target = max(-1.0, min(1.0, reward))            # reward sign = desired valence
+        target = max(-1.0, min(1.0, _finite_reward(reward)))   # reward sign = desired valence
         for w in words:
             cur = self.learned.get(w, 0.0)
             self.learned[w] = round(cur + self.eta * (target - cur), 4)

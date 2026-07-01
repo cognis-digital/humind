@@ -22,6 +22,21 @@ SCENARIOS = [
     "03_memory_and_association",
     "04_systems_thinking",
     "05_two_minds_tandem",
+    "06_negation_and_affect",
+    "07_intent_classification",
+    "08_working_memory_decay",
+    "09_spreading_activation",
+    "10_predictive_coding",
+    "11_td_credit_assignment",
+    "12_online_valence_learning",
+    "13_cls_consolidation",
+    "14_feedback_loops",
+    "15_leverage_points",
+    "16_priorities_ranking",
+    "17_causal_extraction",
+    "18_full_cognitive_loop",
+    "19_multi_agent_broadcast",
+    "20_robustness_and_errors",
 ]
 
 

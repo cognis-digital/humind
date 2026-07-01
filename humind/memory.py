@@ -28,6 +28,14 @@ class WorkingMemory:
     """Capacity-bounded, decaying short-term store (the attention buffer)."""
 
     def __init__(self, capacity: int = 7, decay: float = 0.8, threshold: float = 0.2) -> None:
+        # Validate up front: capacity <= 0 would silently wipe every item on `add`
+        # (del self.items[capacity:]), and decay >= 1 never forgets — both are footguns.
+        if capacity < 1:
+            raise ValueError(f"capacity must be >= 1, got {capacity}")
+        if not 0.0 < decay < 1.0:
+            raise ValueError(f"decay must be in (0, 1) so activation forgets, got {decay}")
+        if threshold < 0.0:
+            raise ValueError(f"threshold must be >= 0, got {threshold}")
         self.capacity = capacity
         self.decay = decay
         self.threshold = threshold
@@ -37,9 +45,10 @@ class WorkingMemory:
         for it in self.items:                       # re-activate if already present
             if it.content == content:
                 it.activation = min(2.0, it.activation + salience)
-                return
-        self.items.append(WorkingItem(content, max(0.1, salience)))
-        self.items.sort(key=lambda i: i.activation, reverse=True)
+                break
+        else:
+            self.items.append(WorkingItem(content, max(0.1, salience)))
+        self.items.sort(key=lambda i: i.activation, reverse=True)  # keep order consistent
         del self.items[self.capacity:]              # evict least-active beyond capacity
 
     def tick(self) -> None:
@@ -59,7 +68,9 @@ class EpisodicMemory:
         self.events.append((ts, frame))
 
     def recent(self, n: int = 5) -> list:
-        return [f for _, f in self.events[-n:]]
+        if n < 0:
+            raise ValueError(f"n must be >= 0, got {n}")
+        return [f for _, f in self.events[-n:]] if n else []
 
     def search(self, term: str) -> list:
         t = term.lower()
@@ -90,6 +101,8 @@ class AssociativeMemory:
     (spreading activation, after Collins & Loftus / ACT-R)."""
 
     def __init__(self, cap: float = 5.0) -> None:
+        if cap <= 0:
+            raise ValueError(f"cap must be > 0, got {cap}")
         self.w: dict[str, dict[str, float]] = {}
         self.cap = cap
 

@@ -63,7 +63,16 @@ class ContextFrame:
         return asdict(self)
 
 
+def _as_text(text: object, arg: str = "text") -> str:
+    """Coerce/validate a text argument, with a clear error instead of a leaked
+    AttributeError deep in the pipeline."""
+    if not isinstance(text, str):
+        raise TypeError(f"{arg} must be a str, got {type(text).__name__}")
+    return text
+
+
 def classify_intent(text: str) -> str:
+    text = _as_text(text)
     if _QUESTION.search(text):
         return "query"
     if _REFUSE.search(text):
@@ -78,6 +87,7 @@ def classify_intent(text: str) -> str:
 
 
 def entities(text: str) -> list[str]:
+    text = _as_text(text)
     found = []
     for m in _NUMID.finditer(text):
         found.append(m.group(1))
@@ -96,6 +106,7 @@ def entities(text: str) -> list[str]:
 def affect(text: str, extra: dict | None = None) -> tuple[float, float]:
     """Valence/arousal. Negation within the prior two tokens flips a valence word.
     `extra` supplies learned word-valences (see humind.learning.LexiconLearner)."""
+    text = _as_text(text)
     words = re.findall(r"[a-z']+", text.lower())
     if not words:
         return 0.0, 0.0
@@ -125,6 +136,7 @@ def _concept(phrase: str, pos: str) -> str:
 
 def causal_links(text: str) -> list[tuple[str, str, int]]:
     """Extract (cause, effect, polarity) triples from causal language."""
+    text = _as_text(text)
     out, seen = [], set()
     for rx, pol, rev in _CAUSAL:
         for left, right in rx.findall(text):
@@ -139,6 +151,9 @@ def causal_links(text: str) -> list[tuple[str, str, int]]:
 
 
 def salient(text: str, k: int = 5) -> list[str]:
+    text = _as_text(text)
+    if k < 0:
+        raise ValueError(f"k must be >= 0, got {k}")
     words = [w for w in re.findall(r"[A-Za-z][A-Za-z0-9-]+", text.lower()) if w not in _STOP and len(w) > 2]
     freq: dict[str, int] = {}
     for w in words:
@@ -149,6 +164,7 @@ def salient(text: str, k: int = 5) -> list[str]:
 def extract(text: str, lexicon: dict | None = None) -> ContextFrame:
     """Parse an utterance into a ContextFrame. `lexicon` optionally supplies learned
     word-valences (from humind.learning) so affect reflects experience."""
+    text = _as_text(text)
     v, a = affect(text, lexicon)
     return ContextFrame(text=text.strip(), intent=classify_intent(text),
                         entities=entities(text), salient=salient(text), valence=v, arousal=a,

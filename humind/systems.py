@@ -40,9 +40,21 @@ class CausalGraph:
         return sorted(self.edges)
 
     def feedback_loops(self, max_len: int = 6) -> list[dict]:
-        """Return cycles as {nodes, polarity:+1/-1, kind:R|B}. Dedupes rotations."""
+        """Return cycles as {nodes, polarity:+1/-1, kind:R|B}. Dedupes rotations.
+
+        Deduplication is by the *directed* cycle (canonical rotation), not merely the
+        set of nodes — so two loops over the same concepts but in different directions,
+        or with different link polarities, are reported separately rather than collapsed.
+        """
+        if max_len < 1:
+            raise ValueError(f"max_len must be >= 1, got {max_len}")
         loops: list[dict] = []
-        seen_sets: set = set()
+        seen: set = set()
+
+        def _canon(cycle: list[str]) -> tuple[str, ...]:
+            # rotate so the lexicographically smallest node leads; keeps direction
+            i = min(range(len(cycle)), key=lambda j: cycle[j])
+            return tuple(cycle[i:] + cycle[:i])
 
         def dfs(start, node, path, sign):
             if len(path) > max_len:
@@ -50,9 +62,9 @@ class CausalGraph:
             for nxt, pol in self.edges.get(node, []):
                 if nxt == start and len(path) >= 1:
                     cycle = path[:]
-                    canon = frozenset(cycle)
-                    if canon not in seen_sets:
-                        seen_sets.add(canon)
+                    canon = _canon(cycle)
+                    if canon not in seen:
+                        seen.add(canon)
                         prod = sign * pol
                         loops.append({"nodes": cycle, "polarity": prod,
                                       "kind": "R" if prod > 0 else "B"})
