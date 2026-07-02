@@ -187,6 +187,7 @@ Part of the **Cognis Neural Suite** — 300+ source-available tools organized ac
 pip install "git+https://github.com/cognis-digital/humind.git"   # pulls agentlex too
 humind perceive "URGENT: vessel NEPTUNE-STAR went dark near a high-risk corridor"
 humind think "scout reports contact" "command requests a scan" "I think we reroute"
+humind explain "AIS gap leads to escalation" "escalation drives sanctions"  # full state snapshot (JSON)
 humind demo        # two minds converse via agentlex
 ```
 

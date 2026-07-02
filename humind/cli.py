@@ -2,6 +2,7 @@
 
     humind perceive "URGENT: vessel NEPTUNE STAR went dark near Hormuz"
     humind think "report A" "follow-up B" ...     # perceive a sequence, show focus
+    humind explain "report A" "follow-up B" ...    # full cognitive-state snapshot (JSON)
     humind demo                                    # two minds converse via agentlex
 """
 
@@ -37,6 +38,8 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument("--endpoint", default=None, help="OpenAI-compatible base URL (edgemesh/fleet)")
     sp.add_argument("--model", default=None)
     st = sub.add_parser("think"); st.add_argument("text", nargs="+")
+    se = sub.add_parser("explain"); se.add_argument("text", nargs="+")
+    se.add_argument("-n", type=int, default=5, help="items per ranked section")
     sc = sub.add_parser("causal"); sc.add_argument("text", nargs="+")
     sub.add_parser("learn")
     sb = sub.add_parser("bench"); sb.add_argument("-n", type=int, default=20000)
@@ -58,6 +61,12 @@ def main(argv: list[str] | None = None) -> int:
         print("priorities      :", mind.priorities())      # value + centrality weighted
         print("predict (assoc) :", mind.predict())          # spreading activation
         print("facts           :", [f"{s} {pr} {o}" for s, pr, o in mind.memory.semantic.query()])
+        return 0
+    if args.cmd == "explain":
+        mind = Mind("you")
+        for t in args.text:
+            mind.perceive(t)
+        print(json.dumps(mind.introspect(args.n), indent=2))
         return 0
     if args.cmd == "causal":
         mind = Mind("you")

@@ -1,12 +1,12 @@
 # Demos
 
-Twenty runnable scenarios in [`../demos/`](../demos/), each targeting a different
+Twenty-one runnable scenarios in [`../demos/`](../demos/), each targeting a different
 audience and a different layer of the toolkit. Every scenario builds its own fresh
 `Mind` (or raw component) from a small, **bundled inline transcript** — no network,
 no external data, no shared state — so you can run them in any order or on their own.
 
 ```bash
-PYTHONUTF8=1 python demos/run_all.py            # all twenty, end to end (exits 0)
+PYTHONUTF8=1 python demos/run_all.py            # all twenty-one, end to end (exits 0)
 PYTHONUTF8=1 python demos/02_reinforcement_learning.py    # or just one
 ```
 
@@ -150,6 +150,13 @@ Shows both sides of the error contract: malformed / out-of-range inputs (non-str
 text, non-forgetting decay, non-finite reward, bad learning rate) raise clear,
 specific exceptions, while enrichment against an unreachable backend is skipped
 without disturbing the core frame. No traceback escapes.
+
+## 21. Introspection snapshot — *the whole cognitive state in one call*
+**Audience:** tooling / observability builders.
+Drives a Mind through a short scenario, then prints `introspect()` — one
+JSON-serialisable dict spanning focus, priorities, learned values, associative
+cues, facts, learned valences, loops + leverage, and the last surprise. Log-ready,
+built-in types only; it round-trips through `json.dumps` with no custom encoder.
 
 ---
 
