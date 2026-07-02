@@ -127,6 +127,42 @@ class Mind:
         """Reinforcing (R) / balancing (B) loops discovered in the causal model."""
         return self.systems.feedback_loops(max_len)
 
+    # --- introspection -------------------------------------------------------
+    def introspect(self, n: int = 5) -> dict:
+        """A single JSON-serialisable snapshot of the whole cognitive state.
+
+        One call surfaces what the mind is currently doing across every layer —
+        focus, blended priorities, learned values, durable facts, associative
+        cues, and the systems-thinking view (loops + leverage). Handy for logging,
+        dashboards, or explaining *why* the mind is prioritising what it is. The
+        result contains only built-in types (str/float/int/list/dict), so it
+        drops straight into `json.dumps` or a `--format json` pipe.
+
+        `n` bounds each ranked list; pass `n <= 0` for a raw error.
+        """
+        if n < 1:
+            raise ValueError(f"n must be >= 1, got {n}")
+        focus = self.attention(n)
+        return {
+            "name": self.name,
+            "clock": self._clock,
+            "focus": focus,
+            "priorities": self.priorities(n),
+            "values": [{"item": k, "value": round(v, 4)} for k, v in self.values.valued(n)],
+            "predict": self.predict(n=n),
+            "associations": {c: self.memory.assoc.associates(c.lower(), n) for c in focus},
+            "facts": [{"subject": s, "predicate": p, "object": o}
+                      for s, p, o in sorted(self.memory.semantic.query())],
+            "learned_valence": dict(sorted(self.lexicon.overrides().items())),
+            "loops": [{"kind": lp["kind"], "nodes": lp["nodes"]}
+                      for lp in self.feedback_loops()],
+            "leverage": [{"concept": c, "centrality": d} for c, d in self.leverage_points(n)],
+            "surprise_last": round(
+                self.memory.episodic.recent(1)[0].surprise, 3
+            ) if self.memory.episodic.events else 0.0,
+            "episodes": len(self.memory.episodic.events),
+        }
+
     # --- language (agentlex tandem) -----------------------------------------
     def express(self, frame: ContextFrame | None = None):
         """Turn understood context into an agentlex Message."""

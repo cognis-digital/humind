@@ -33,6 +33,7 @@ SCENARIOS = [
     "18_full_cognitive_loop",
     "19_multi_agent_broadcast",
     "20_robustness_and_errors",
+    "21_introspection_snapshot",
 ]
 
 

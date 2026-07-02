@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- **`Mind.introspect(n=5)`** — a single JSON-serialisable snapshot of the whole
+  cognitive state (focus, blended priorities, learned values, associative cues,
+  durable facts, learned valences, feedback loops + leverage, last surprise, and
+  counters). Built-in types only, so it drops straight into `json.dumps`, a log line,
+  or a dashboard without a custom encoder.
+- **`humind explain "…" "…"`** — CLI wrapper that perceives a sequence and prints the
+  `introspect()` snapshot as indented JSON (`-n` bounds each ranked section).
+- Demo 21 (`introspection_snapshot`) and `tests/test_introspect.py`.
+
 ## [0.3.2] — 2026-07-01
 
 The "hardening" release — clearer errors, fixed edge-case bugs, and a much deeper
